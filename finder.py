@@ -36,9 +36,6 @@ def get_categories():
     return parse_nav_tree(root)
 
 
-# category_url = "http://white2tea.com/tea-shop/product-category/raw-puer-tea/white2tea-raw-puer-tea/2016-white2tea-puer-teas/"
-
-
 def get_product_urls(soup):
     product_urls = []
     while soup:  # while soup is not none process next page.
@@ -52,7 +49,7 @@ def get_product_urls(soup):
 
 def get_next_page(soup):
     page = soup.find('a', class_="next page-numbers")
-    if page == None:
+    if page is None:
         return None
     else:
         link = page["href"]
@@ -64,9 +61,7 @@ def get_next_page(soup):
 
 def encode_url(url):
     encoded_url = base64.b64encode(url.encode("utf-8"))
-    return (encoded_url.decode("utf-8"))
-    # decoding
-    # base64.b64decode('encoded')
+    return encoded_url.decode("utf-8")
 
 
 def timestamp():
