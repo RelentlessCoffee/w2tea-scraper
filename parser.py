@@ -40,6 +40,16 @@ def get_html(obj):
     return soup
 
 
+def list_days_between(start: pendulum.Pendulum, end: pendulum.Pendulum):
+    start = start.start_of("day")
+    end = end.start_of("day")
+    days = []
+    while start < end:
+        days.append(start)
+        start = start.add(days=1)
+    return days
+
+
 def parse_and_upload(obj):
     soup = get_html(obj)
     name = find_name(soup)
@@ -114,5 +124,5 @@ def find_name(soup):
 
 if __name__ == '__main__':
     vendor = "w2t"
-    date = pendulum.now().subtract(days=7)
-    parse_and_upload_vendor(vendor, date)
+    uploaded_after = pendulum.now().subtract(days=7)
+    parse_and_upload_vendor(vendor, uploaded_after)
