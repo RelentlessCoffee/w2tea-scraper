@@ -3,17 +3,17 @@ import base64
 import pendulum
 import bs4
 import json
-from data import insert_row
+from data import insert_row, get_last_import_date, set_last_import_date
 
 prefixes = {
     "w2t": "white2tea/raw_data/"
 }
 
 
-def list_objects(vendor: str, uploaded_after: pendulum.Pendulum):
+def list_objects(vendor: str, uploaded_on: pendulum.Pendulum):
     bucket = boto3.resource("s3").Bucket("tea-scraper")
     objects = []
-    prefix = prefixes[vendor]
+    prefix = prefixes[vendor] + uploaded_on.to_date_string()
     for item in bucket.objects.filter(Prefix=prefix):
         # removes prefix from object key
         pieces = item.key[len(prefix):].split("/")
@@ -22,14 +22,13 @@ def list_objects(vendor: str, uploaded_after: pendulum.Pendulum):
         encoded_url = encoded_url.encode("utf-8")
         decoded_url = base64.b64decode(encoded_url)
         decoded_url = decoded_url.decode("utf-8")
-        if date > uploaded_after:
-            obj = {
-                "vendor": vendor,
-                "date": date,
-                "url": decoded_url,
-                "item": item
-            }
-            objects.append(obj)
+        obj = {
+            "vendor": vendor,
+            "date": date,
+            "url": decoded_url,
+            "item": item
+        }
+        objects.append(obj)
     return objects
 
 
@@ -53,7 +52,6 @@ def list_days_between(start: pendulum.Pendulum, end: pendulum.Pendulum):
 def parse_and_upload(obj):
     soup = get_html(obj)
     name = find_name(soup)
-    print(name)
     options = find_options(soup)
     date = obj["date"]
     vendor = obj["vendor"]
@@ -64,10 +62,15 @@ def parse_and_upload(obj):
         insert_row(vendor, name, weight, quantity, date, url)
 
 
-def parse_and_upload_vendor(vendor: str, uploaded_after: pendulum.Pendulum):
-    objs = list_objects(vendor, uploaded_after)
-    for obj in objs:
-        parse_and_upload(obj)
+def parse_and_upload_vendor(vendor: str):
+    start = get_last_import_date(vendor)
+    end = pendulum.utcnow()
+    days = list_days_between(start, end)
+    for date in days:
+        objs = list_objects(vendor, date)
+        for obj in objs:
+            parse_and_upload(obj)
+        set_last_import_date(vendor, date)
 
 
 class NoMaxQuantity(Exception):
@@ -86,10 +89,10 @@ def _find_options_from_form(soup):
     # return list(zip(options, quantities))
     option_dicts = []
     for option, quantity in zip(options, quantities):
-        if quantity == "":
-            quantity = None
-        else:
+        try:
             quantity = int(quantity)
+        except (TypeError, ValueError):
+            quantity = None
         option_dicts.append({
             "weight": option,
             "quantity": quantity
@@ -124,5 +127,4 @@ def find_name(soup):
 
 if __name__ == '__main__':
     vendor = "w2t"
-    uploaded_after = pendulum.now().subtract(days=7)
-    parse_and_upload_vendor(vendor, uploaded_after)
+    parse_and_upload_vendor(vendor)
