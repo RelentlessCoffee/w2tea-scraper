@@ -6,7 +6,8 @@ import pendulum
 
 class Product(BaseModel):
     class Meta:
-        write_units = 5
+        read_units = 1
+        write_units = 25
     name = Column(String, hash_key=True, name="n")
     date = Column(DateTime, range_key=True, name="d")
     quantity = Column(Integer, name="q")

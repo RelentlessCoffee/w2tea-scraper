@@ -1,0 +1,21 @@
+from data import engine, Product
+
+
+def create_query(name):
+    return engine.query(
+        Product,
+        key=Product.name == name
+    )
+
+
+# example
+query = create_query("w2t.2006-old-bear-fangcha.100g")
+for entry in query:
+    print(entry)
+
+
+# creating a list saves the results so you can inspect them more than once
+# print the second result
+some_other_query = create_query("w2t.2006-old-bear-fangcha.100g")
+results = list(some_other_query)
+print(results[1])

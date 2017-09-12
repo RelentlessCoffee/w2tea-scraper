@@ -13,8 +13,8 @@ prefixes = {
 def list_objects(vendor: str, uploaded_on: pendulum.Pendulum):
     bucket = boto3.resource("s3").Bucket("tea-scraper")
     objects = []
-    prefix = prefixes[vendor] + uploaded_on.to_date_string()
-    for item in bucket.objects.filter(Prefix=prefix):
+    prefix = prefixes[vendor]
+    for item in bucket.objects.filter(Prefix=prefix + uploaded_on.to_date_string()):
         # removes prefix from object key
         pieces = item.key[len(prefix):].split("/")
         date_string, encoded_url = pieces
