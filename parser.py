@@ -3,8 +3,9 @@ import base64
 import pendulum
 import bs4
 import json
+from s3 import Cache
 from data import insert_row, get_last_import_date, set_last_import_date
-
+cache = Cache()
 prefixes = {
     "w2t": "white2tea/raw_data/"
 }
@@ -33,8 +34,7 @@ def list_objects(vendor: str, uploaded_on: pendulum.Pendulum):
 
 
 def get_html(obj):
-    item = obj["item"].get()
-    content = item["Body"].read()
+    content = cache.get(obj["item"])
     soup = bs4.BeautifulSoup(content, 'html.parser')
     return soup
 
