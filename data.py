@@ -1,33 +1,59 @@
-from typing import Optional
+from typing import Optional, Union
 from bloop import BaseModel, Column, String, Integer, Engine
 from bloop.ext.pendulum import DateTime
 import pendulum
 
 
-class Product(BaseModel):
+PRICE_SCALE = 10000
+
+
+class ScrapedData(BaseModel):
     class Meta:
+        write_units = 10
         read_units = 1
-        write_units = 25
-    name = Column(String, hash_key=True, name="n")
-    date = Column(DateTime, range_key=True, name="d")
+        table_name = "teascraper.ScrapedData"
+    id = Column(String, hash_key=True, name="id")
+    date = Column(DateTime, range_key=True, name="sd")
     quantity = Column(Integer, name="q")
     url = Column(String, name="u")
-    og_name = Column(String, name="og")
+    price = Column(Integer, name="p")
+
+
+class Product(BaseModel):
+    class Meta:
+        write_units = 5
+        read_units = 1
+        table_name = "teascraper.Product"
+    vendor_id = Column(String, hash_key=True, name="vid")
+    product_id = Column(String, range_key=True, name="pid")
+    sku = Column(String, name="sku")
+    variation = Column(String, name="v")
+    weight = Column(String, name="w")
+    name = Column(String, name="n")
 
 
 class VendorImports(BaseModel):
-    vendor = Column(String, hash_key=True, name="v")
+    class Meta:
+        table_name = "teascraper.VendorImports"
+    vendor_id = Column(String, hash_key=True, name="id")
     last_run_at = Column(DateTime, name="lr")
 
 
 engine = Engine()
 engine.bind(Product)
 engine.bind(VendorImports)
+engine.bind(ScrapedData)
 
 
-def make_product_name(vendor: str, name: str, weight: str):
+def make_product_id(vendor: str, name: str, weight: str):
     name = name.lower().replace(" ", "-").replace(".", "_")
     product_name = vendor + "." + name + "." + weight
+    return product_name
+
+
+def unique_product_name(name: str, weight: str):
+    name = name.lower().replace(" ", "-").replace(".", "_")
+    product_name = name + "." + weight
     return product_name
 
 
@@ -42,14 +68,35 @@ def set_last_import_date(vendor: str, date: pendulum.Pendulum):
     engine.save(run)
 
 
-def insert_row(vendor: str, name: str, weight: str, quantity: Optional[int], date: pendulum.Pendulum, url: str):
-    product = Product()
-    product.name = make_product_name(vendor, name, weight)
-    product.date = date
-    product.quantity = quantity
-    product.url = url
-    product.og_name = name
-    engine.save(product)
+def insert_row(
+        vendor_id: str,
+        name: str,
+        sku: str,
+        variation: str,
+        weight: str,
+        quantity: Optional[int],
+        date: pendulum.Pendulum,
+        url: str,
+        price: Optional[Union[int, float]]):
+    product_id = unique_product_name(name, weight)
+    if price is not None:
+        price = int(price * PRICE_SCALE)
+    product = Product(
+        vendor_id=vendor_id,
+        product_id=product_id,
+        sku=sku,
+        variation=variation,
+        weight=weight,
+        name=name
+    )
+    data = ScrapedData(
+        id=vendor_id + "." + product_id,
+        date=date,
+        quantity=quantity,
+        url=url,
+        price=price
+    )
+    engine.save(product, data)
 
 
 # insert_row("w2t", "repave", "25g", 2041, pendulum.now(), "my-url")
