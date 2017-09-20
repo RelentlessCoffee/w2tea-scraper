@@ -57,14 +57,14 @@ def unique_product_name(name: str, weight: str):
     return product_name
 
 
-def get_last_import_date(vendor: str):
-    run = VendorImports(vendor=vendor)
+def get_last_import_date(vendor_id: str):
+    run = VendorImports(vendor_id=vendor_id)
     engine.load(run)
     return run.last_run_at
 
 
-def set_last_import_date(vendor: str, date: pendulum.Pendulum):
-    run = VendorImports(vendor=vendor, last_run_at=date)
+def set_last_import_date(vendor_id: str, date: pendulum.Pendulum):
+    run = VendorImports(vendor_id=vendor_id, last_run_at=date)
     engine.save(run)
 
 
@@ -84,9 +84,9 @@ def insert_row(
     product = Product(
         vendor_id=vendor_id,
         product_id=product_id,
-        sku=sku,
-        variation=variation,
-        weight=weight,
+        sku=sku or None,
+        variation=variation or None,
+        weight=weight or None,
         name=name
     )
     data = ScrapedData(
