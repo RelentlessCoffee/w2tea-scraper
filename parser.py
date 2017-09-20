@@ -3,9 +3,9 @@ import base64
 import bs4
 import pendulum
 import json
-from s3 import Cache
+from s3 import cache_for_host
 from data import insert_row, get_last_import_date, set_last_import_date
-cache = Cache()
+cache = cache_for_host()
 prefixes = {
     "w2t": "white2tea/raw_data/"
 }
