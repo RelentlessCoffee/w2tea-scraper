@@ -87,15 +87,23 @@ def parse_from_form(soup):
     form = json.loads(product_data)
     parsed_data = []
     for entry in form:
+        weight = entry['attributes'].get('attribute_pa_amount', "")
         quantity = entry["max_qty"]
-        if quantity is not None:
+        price = entry['display_price']
+        try:
             quantity = int(quantity)
+        except (TypeError, ValueError):
+            quantity = None
+        try:
+            price = float(price)
+        except (TypeError, ValueError):
+            price = None
         parsed_data.append({
-            "sku": entry['sku'],
+            "sku": str(entry['sku']),
             "variation": str(entry['variation_id']),
-            "weight": entry['attributes']['attribute_pa_amount'],
+            "weight": weight,
             "quantity": quantity,
-            "price": float(entry['display_price'])
+            "price": price
         })
     return parsed_data
 
