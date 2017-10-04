@@ -10,7 +10,6 @@ PRICE_SCALE = 10000
 class ScrapedData(BaseModel):
     class Meta:
         write_units = 10
-        read_units = 1
         table_name = "teascraper.ScrapedData"
     id = Column(String, hash_key=True, name="id")
     date = Column(DateTime, range_key=True, name="sd")
@@ -22,7 +21,6 @@ class ScrapedData(BaseModel):
 class Product(BaseModel):
     class Meta:
         write_units = 5
-        read_units = 1
         table_name = "teascraper.Product"
     vendor_id = Column(String, hash_key=True, name="vid")
     product_id = Column(String, range_key=True, name="pid")

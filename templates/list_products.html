@@ -1,0 +1,11 @@
+{% extends "_base.html" %}
+{% block title %}Available Products{% endblock %}
+{% block body %}
+<ol>
+{% for product in products %}
+
+        <li><a href="{{ url_for('get_product', vendor_id=vendor_id, product_id=product.product_id) }}"><h1>{{ product.name }} - {{ product.weight }}</h1></a></li>
+
+{% endfor %}
+</ol>
+{% endblock %}
