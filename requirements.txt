@@ -1,0 +1,10 @@
+bloop
+flask
+beautifulsoup4
+Jinja2
+requests
+matplotlib
+numpy
+pendulum
+click
+ipython
