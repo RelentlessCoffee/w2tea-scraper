@@ -1,5 +1,5 @@
 from typing import Optional, Union
-from bloop import BaseModel, Column, String, Integer, Engine
+from bloop import BaseModel, Column, String, Integer, Engine, BloopException
 from bloop.ext.pendulum import DateTime
 import pendulum
 
@@ -38,9 +38,15 @@ class VendorImports(BaseModel):
 
 
 engine = Engine()
-engine.bind(Product)
-engine.bind(VendorImports)
-engine.bind(ScrapedData)
+models = [Product, VendorImports, ScrapedData]
+# super hack to handle table setup
+# in read-only prod environment
+for model in models:
+    try:
+        engine.bind(model)
+    except BloopException:
+        print("Skipping table setup for " + model.__name__)
+        engine.bind(model, skip_table_setup=True)
 
 
 def make_product_id(vendor: str, name: str, weight: str):
@@ -97,4 +103,30 @@ def insert_row(
     engine.save(product, data)
 
 
-# insert_row("w2t", "repave", "25g", 2041, pendulum.now(), "my-url")
+def list_vendors():
+    imports = engine.scan(VendorImports)
+    vendors = []
+    for item in imports:
+        vendors.append(item.vendor_id)
+    return vendors
+
+
+def list_products(vendor_id):
+    products = engine.query(Product, key=Product.vendor_id == vendor_id)
+    return list(products)
+
+
+def get_product(vendor_id, product_id):
+    product = Product(vendor_id=vendor_id, product_id=product_id)
+    engine.load(product)
+    return product
+
+
+def list_samples(vendor_id, product_id):
+    id = vendor_id + "." + product_id
+    samples = engine.query(ScrapedData, key=ScrapedData.id == id)
+    samples = list(samples)
+    for sample in samples:
+        if sample.price is not None:
+            sample.price /= float(PRICE_SCALE)
+    return samples

@@ -51,9 +51,21 @@ with app.test_request_context():
     print(url_for('get_product', vendor_id='w2t', product_id='my_cunt'))
 
 
-if __name__ == "__main__":
+def run_debug():
     app.config.update(
         DEBUG=True,
         TEMPLATES_AUTO_RELOAD=True
     )
     app.run()
+
+
+def run_prod():
+    app.config.update(
+        DEBUG=False,
+        TEMPLATES_AUTO_RELOAD=False
+    )
+    app.run(host='0.0.0.0', port=80)
+
+
+if __name__ == "__main__":
+    run_debug()
