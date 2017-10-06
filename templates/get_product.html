@@ -32,6 +32,13 @@ var myChart = new Chart(ctx, {
         }]
     },
     options: {
+        title: {
+            display: true,
+            text: '{{product.name}}'
+        },
+        legend: {
+            display: false,
+        },
         elements: {
             line: {
                 tension: 0

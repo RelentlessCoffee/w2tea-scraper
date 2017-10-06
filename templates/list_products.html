@@ -1,11 +1,39 @@
 {% extends "_base.html" %}
 {% block title %}Available Products{% endblock %}
+
 {% block body %}
-<ol>
-{% for product in products %}
+<div class="container">
+<table id="example" class="table table-striped table-bordered" width="100%" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Weight</th>
 
-        <li><a href="{{ url_for('get_product', vendor_id=vendor_id, product_id=product.product_id) }}"><h1>{{ product.name }} - {{ product.weight }}</h1></a></li>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Product</th>
+                <th>Weight</th>
+            </tr>
+        </tfoot>
+        <tbody>
+                {% for product in products %}
 
-{% endfor %}
-</ol>
+                <tr>
+                    <td><a href="{{ url_for('get_product', vendor_id=vendor_id, product_id=product.product_id) }}">{{ product.name }}</a></td><td>{{ product.weight }}</td>
+                </tr>
+
+                {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
+</script>
 {% endblock %}
