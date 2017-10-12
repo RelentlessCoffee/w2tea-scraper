@@ -43,7 +43,7 @@ def list_days_between(start: pendulum.Pendulum, end: pendulum.Pendulum):
     start = start.start_of("day")
     end = end.start_of("day")
     days = []
-    while start < end:
+    while start <= end:
         days.append(start)
         start = start.add(days=1)
     return days

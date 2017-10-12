@@ -9,32 +9,32 @@ PRICE_SCALE = 10000
 
 class ScrapedData(BaseModel):
     class Meta:
-        write_units = 10
+        write_units = 5
         table_name = "teascraper.ScrapedData"
-    id = Column(String, hash_key=True, name="id")
-    date = Column(DateTime, range_key=True, name="sd")
-    quantity = Column(Integer, name="q")
-    url = Column(String, name="u")
-    price = Column(Integer, name="p")
+    id = Column(String, hash_key=True, dynamo_name="id")
+    date = Column(DateTime, range_key=True, dynamo_name="sd")
+    quantity = Column(Integer, dynamo_name="q")
+    url = Column(String, dynamo_name="u")
+    price = Column(Integer, dynamo_name="p")
 
 
 class Product(BaseModel):
     class Meta:
         write_units = 5
         table_name = "teascraper.Product"
-    vendor_id = Column(String, hash_key=True, name="vid")
-    product_id = Column(String, range_key=True, name="pid")
-    sku = Column(String, name="sku")
-    variation = Column(String, name="v")
-    weight = Column(String, name="w")
-    name = Column(String, name="n")
+    vendor_id = Column(String, hash_key=True, dynamo_name="vid")
+    product_id = Column(String, range_key=True, dynamo_name="pid")
+    sku = Column(String, dynamo_name="sku")
+    variation = Column(String, dynamo_name="v")
+    weight = Column(String, dynamo_name="w")
+    name = Column(String, dynamo_name="n")
 
 
 class VendorImports(BaseModel):
     class Meta:
         table_name = "teascraper.VendorImports"
-    vendor_id = Column(String, hash_key=True, name="id")
-    last_run_at = Column(DateTime, name="lr")
+    vendor_id = Column(String, hash_key=True, dynamo_name="id")
+    last_run_at = Column(DateTime, dynamo_name="lr")
 
 
 engine = Engine()
@@ -91,7 +91,7 @@ def insert_row(
         sku=sku or None,
         variation=variation or None,
         weight=weight or None,
-        name=name
+        dynamo_name=name
     )
     data = ScrapedData(
         id=vendor_id + "." + product_id,
