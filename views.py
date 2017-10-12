@@ -41,14 +41,15 @@ def get_product(vendor_id, product_id):
     samples = data.list_samples(vendor_id, product_id)
     product = data.get_product(vendor_id, product_id)
     vendors = data.list_vendors()
-    return render_template('get_product.html', product=product, samples=samples, vendors=vendors)
+    url = samples[-1].url
+    return render_template('get_product.html', product=product, samples=samples, vendors=vendors, url=url)
 
 
 with app.test_request_context():
     print(url_for('list_vendors'))
     print(url_for('get_vendor', vendor_id='w2t'))
     print(url_for('list_products', vendor_id='w2t'))
-    print(url_for('get_product', vendor_id='w2t', product_id='my_cunt'))
+    print(url_for('get_product', vendor_id='w2t', product_id='product_page'))
 
 
 def run_debug():

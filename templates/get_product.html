@@ -22,43 +22,77 @@ var ctx = document.getElementById("myChart").getContext('2d');
 var myChart = new Chart(ctx, {
     type: 'line',
     data: {
-        datasets: [{
-            data: [
-                {% for sample in samples %}
-                  {"x": "{{sample.date}}", "y": {{sample.quantity or "null"}}
-                  },
-                {% endfor %}
-            ]
-        }]
+        datasets: [
+            {
+                label: "Quantity",
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                lineTension: .1,
+                yAxisID: 'A',
+                data: [{% for sample in samples %}{"x": "{{sample.date}}", "y": {{sample.quantity or "null"}}},{% endfor %}],
+            },
+            {
+                label: "Price",
+                fill: false,
+                borderColor: 'rgb(239, 69, 142)',
+                lineTension: .1,
+                yAxisID: 'B',
+                data: [{% for sample in samples %}{"x": "{{sample.date}}", "y": {{sample.price or "null"}}},{% endfor %}],
+            }
+        ]
     },
     options: {
+        responsive: true,
         title: {
             display: true,
-            text: '{{product.name}}'
+            text: '{{product.name}} {{product.weight}}'
         },
-        legend: {
-            display: false,
+        tooltips: {
+            mode: 'index',
+            intersect: false
         },
+        hover: {
+            mode: 'nearest',
+            intersect: true
+        },
+        legend: {display: true},
         elements: {
-            line: {
-                tension: 0
-            }
+            line: {tension: 0}
         },
-        responsive: false,
         scales: {
             xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Time'
+                },
                 type: "time",
-                time: {
-                    unit: 'week'
-                }
+                time: {unit: 'week'}
             }],
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
+            yAxes: [
+                {
+                    id: 'A',
+                    position: 'left',
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Quantity'
+                    },
+                    ticks: {beginAtZero:true
+                    }
+                },
+                {
+                    id: 'B',
+                    position: 'right',
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Price'
+                    },
+                    ticks: {beginAtZero:false,
+                    stepSize: 5}
                 }
-            }]
+            ]
         }
     }
 });
 </script>
+<a href="{{url}}">Actual Product Page: {{product.name}}</a>
 {% endblock %}
